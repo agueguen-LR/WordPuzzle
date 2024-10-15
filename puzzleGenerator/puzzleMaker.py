@@ -1,3 +1,4 @@
+from collections import Counter
 
 def loadDictionary(language):
     """
@@ -12,19 +13,30 @@ def loadDictionary(language):
     return validWords
 
 
-def filterWords(allWords, letters):
+def filterWords(allWords, letters, length, minlength = 3):
     """
-    Filters the given set of words to contain only words containing the given letters
+    Filters the given set of words to contain only words according to the given constraints
     @param allWords: set containing all the words of the language
-    @param letters: list of letters that must be contained in the words
-    @return: set containing all the words composed of only the given letters
+    @param letters: list of letters that can be contained in the words in the appropriate quantity
+    @param length: maximum length of the words
+    @param minlength: minimum length of the words
+    @return: set containing all the valid words
     """
     filteredWords = set()
+    lettersCounter = Counter(letters)
+
     for word in allWords:
-        if set(word).issubset(letters):
+        #Optimisation: don't do further operations if word is too long
+        if len(word) > length or len(word) < minlength:
+            continue
+        # Optimisation: don't do further operations if word isn't composed of correct letters using set operations
+        if not set(word).issubset(letters):
+            continue
+        # Final check, word is composed of letters in the correct quantities
+        if all(Counter(word)[char] <= lettersCounter[char] for char in Counter(word)) and len(word) <= length:
             filteredWords.add(word)
     return filteredWords
 
-frenchDictionaryAll = loadDictionary("French")
-frenchDictionaryABCDE = filterWords(frenchDictionaryAll, ['A','B','C','D','E'])
+frenchDictionaryAll = loadDictionary("french")
+frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "BRAVERA", 5)
 print(frenchDictionaryABCDE)
