@@ -13,7 +13,7 @@ def loadDictionary(language):
     return validWords
 
 
-def filterWords(allWords, letters, length, minlength = 3):
+def filterWords(allWords, letters, length=99, minlength = 3):
     """
     Filters the given set of words to contain only words according to the given constraints
     @param allWords: set containing all the words of the language
@@ -33,9 +33,11 @@ def filterWords(allWords, letters, length, minlength = 3):
         if not set(word).issubset(letters):
             continue
         # Final check, word is composed of letters in the correct quantities
-        if all(Counter(word)[char] <= lettersCounter[char] for char in Counter(word)) and len(word) <= length:
+        if all(Counter(word)[char] <= lettersCounter[char] for char in Counter(word)):
             filteredWords.add(word)
     return filteredWords
+
+
 
 frenchDictionaryAll = loadDictionary("french")
 frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "BRAVERA", 5)
