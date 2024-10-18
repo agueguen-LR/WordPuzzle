@@ -1,5 +1,10 @@
 from collections import Counter
 from random import choices
+import sqlite3
+import pandas as pd
+
+Ldimensions = {'x':13, 'y':6}
+Sdimensions = {'x':6, 'y':7}
 
 def loadDictionaryFR() -> set:
     """
@@ -16,7 +21,7 @@ def loadDictionaryFR() -> set:
 def generateLetters(amount: int, letterFrequency: list) -> list:
      return choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", weights = letterFrequency, k=amount)
 
-def filterWords(allWords, letters, length=99, minlength = 3):
+def filterWords(allWords: set, letters: list, length=99, minlength = 3) -> set:
     """
     Filters the given set of words to contain only words according to the given constraints
     @param allWords: set containing all the words of the language
@@ -40,8 +45,45 @@ def filterWords(allWords, letters, length=99, minlength = 3):
             filteredWords.add(word)
     return filteredWords
 
+def generatePuzzle(size: str) -> pd.DataFrame:
+    """
+    JUST TESTING FOR NOW
+    @param size:
+    @return:
+    """
+    output = pd.DataFrame({'word': ["VACHE", "POULET"], 'IS_VERTICAL': [True, False], 'x': [3, 5], 'y':[4, 6]})
+    return output
 
+def printDatabase():
+    """
+    JUST TESTING FOR NOW
+    @return:
+    """
+    conn = sqlite3.connect('sqlite.db')
+    c = conn.cursor()
+    print(c.execute('SELECT * FROM puzzle').fetchall())
+    print(c.execute('SELECT * FROM words').fetchall())
 
-frenchDictionaryAll = loadDictionaryFR()
-frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")
-print(frenchDictionaryABCDE)
+def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleType: str):
+    """
+    JUST TESTING FOR NOW
+    @param currentPuzzle:
+    @param puzzleType:
+    @return:
+    """
+    conn = sqlite3.connect("sqlite.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO puzzle(puzzlesize) VALUES (?)", (puzzleType,))
+    for _, row in currentPuzzle.iterrows():
+        c.execute("""
+                INSERT INTO words(puzzleID, word, IS_VERTICAL, x, y) 
+                VALUES (?, ?, ?, ?, ?)
+            """, (puzzleType, row['word'], row['IS_VERTICAL'], row['x'], row['y']))
+    conn.commit()
+    conn.close()
+
+insertPuzzle(generatePuzzle('L'), 'L')
+# frenchDictionaryAll = loadDictionaryFR()
+# frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")
+# print(frenchDictionaryABCDE)
+printDatabase()
