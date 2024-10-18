@@ -1,17 +1,20 @@
 from collections import Counter
+from random import choices
 
-def loadDictionary(language):
+def loadDictionaryFR() -> set:
     """
     Loads the dictionary for the given language
     @param language: string of the name of the language in lowercase
     @return: set containing all the words in the given dictionary
     """
     validWords = set()
-    f = open("dico"+ language +".txt", 'r')
+    f = open("dicofrench.txt", 'r')
     for line in f:
         validWords.add(line.strip('\n'))
     return validWords
 
+def generateLetters(amount: int, letterFrequency: list) -> list:
+     return choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", weights = letterFrequency, k=amount)
 
 def filterWords(allWords, letters, length=99, minlength = 3):
     """
@@ -39,6 +42,6 @@ def filterWords(allWords, letters, length=99, minlength = 3):
 
 
 
-frenchDictionaryAll = loadDictionary("french")
-frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "BRAVERA", 5)
+frenchDictionaryAll = loadDictionaryFR()
+frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")
 print(frenchDictionaryABCDE)
