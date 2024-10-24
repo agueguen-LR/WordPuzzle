@@ -1,13 +1,14 @@
 from puzzleMaker import *
 from WordsDatabaseGenerator import *
 
-dictionaryFileAddress = "dictionary-fr.txt"
+dictionaryFileAddress = "dictionary-en.txt"
 frenchLexiconLink = "http://www.lexique.org/databases/Lexique382/Lexique382.tsv"
+englishLexiconLink = "http://www.lexique.org/databases/SUBTLEX-US/SUBTLEXus74286wordstextversion.tsv"
 
 dictionary = loadDictionary(dictionaryFileAddress)
-frequencies = loadFrequency(frenchLexiconLink, ['ortho', 'freqfilms2', 'freqlivres'])
+frequencies = loadFrequency(englishLexiconLink, ['Word', 'SUBTLWF'])
 words = loadLanguage(dictionary, frequencies)
-addLanguageToDatabase("FR", words)
+addLanguageToDatabase("EN", words)
 # insertPuzzle(generatePuzzle('L'), 'L')
 # frenchDictionaryAll = loadDictionaryFR()
 # frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")

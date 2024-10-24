@@ -4,11 +4,11 @@ import sqlite3
 import pandas as pd
 
 #Insert the name of the sqlite database here
-SQLITE_DATABASE_NAME = "sqlite.db"
+SQLITE_DATABASE_NAME = "puzzles.db"
 
 #Dimensions of the large and the small puzzles
-Ldimensions = {'x':13, 'y':6}
-Sdimensions = {'x':6, 'y':7}
+LDimensions = {'x':13, 'y':6}
+SDimensions = {'x':6, 'y':7}
 
 def loadDictionaryFR() -> set:
     """
@@ -16,7 +16,7 @@ def loadDictionaryFR() -> set:
     @return: set containing all the words in the given dictionary
     """
     validWords = set()
-    f = open("dicofrench.txt", 'r')
+    f = open("dictionary-fr.txt", 'r')
     for line in f:
         validWords.add(line.strip('\n'))
     return validWords
@@ -57,17 +57,19 @@ def generatePuzzle(size: str) -> pd.DataFrame:
     output = pd.DataFrame({'word': ["VACHE", "POULET"], 'IS_VERTICAL': [True, False], 'x': [3, 5], 'y':[4, 6]})
     return output
 
-def printDatabase() -> None:
+def printDatabase(database:str = SQLITE_DATABASE_NAME) -> None:
     """
     prints out the puzzle and words database for testing purposes
     @return: None
     """
-    conn = sqlite3.connect('sqlite.db')
+    conn = sqlite3.connect(database)
     c = conn.cursor()
     print(c.execute('SELECT * FROM puzzle').fetchall())
     print(c.execute('SELECT * FROM words').fetchall())
+    conn.commit()
+    conn.close()
 
-def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleType: str, database = SQLITE_DATABASE_NAME) -> None:
+def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleType: str, database:str = SQLITE_DATABASE_NAME) -> None:
     """
     Inserts a new puzzle into the database
     @param currentPuzzle: dataframe containing the current puzzle
@@ -83,9 +85,3 @@ def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleType: str, database = SQLITE
                   (puzzleType, row['word'], row['IS_VERTICAL'], row['x'], row['y']))
     conn.commit()
     conn.close()
-
-insertPuzzle(generatePuzzle('L'), 'L')
-# frenchDictionaryAll = loadDictionaryFR()
-# frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")
-# print(frenchDictionaryABCDE)
-printDatabase()

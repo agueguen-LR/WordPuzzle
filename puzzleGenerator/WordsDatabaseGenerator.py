@@ -71,3 +71,5 @@ def clearLanguage(databaseName: str, language: str) -> None:
     conn = sqlite3.connect(databaseName)
     c = conn.cursor()
     c.execute('DROP TABLE IF EXISTS ?', language)
+    conn.commit()
+    conn.close()
