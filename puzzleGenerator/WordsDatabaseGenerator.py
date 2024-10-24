@@ -3,9 +3,21 @@ import pandas as pd
 from unidecode import unidecode
 
 def loadDictionary(dictionaryFile:str) -> pd.DataFrame:
+    """
+    Loads dictionary.txt file into a pandas Dataframe
+    The dictionary should contain 1 word per Line, capital letters only, no special characters
+    @param dictionaryFile: file path of the dictionary file
+    @return: pandas Dataframe containing all the available words
+    """
     return pd.read_csv(dictionaryFile, names=['word'])
 
 def loadFrequency(frequencyFile: str, freqColumns: list) -> pd.DataFrame:
+    """
+    Loads frequency file (usually tsv from external openlexicon link) into a pandas Dataframe
+    @param frequencyFile: address of the lexicon database
+    @param freqColumns: list of column names of the frequency table, column 0 should be the words, additional colmuns will be frequency mesurements averaged out
+    @return: pandas Dataframe containing the words and their frequency
+    """
 
     frequencies = pd.read_csv(frequencyFile, delimiter='\t', usecols=freqColumns)
     frequencies.rename(columns={freqColumns[0]: 'word'}, inplace=True)
@@ -22,6 +34,13 @@ def loadFrequency(frequencyFile: str, freqColumns: list) -> pd.DataFrame:
     return frequencies[['word', 'freq']]
 
 def loadLanguage(dictionary:pd.DataFrame, frequencies:pd.DataFrame) -> pd.DataFrame:
+    """
+    Loads the full dictionary and available frequencies into a pandas Dataframe,
+    words not present in the frequencies dataframe will have NaN value
+    @param dictionary: dictionary Dataframe
+    @param frequencies: frequencies Dataframe
+    @return: language Dataframe containing all words and their frequency
+    """
 
     output = pd.merge(dictionary, frequencies[['word', 'freq']], on='word', how='left')
 
@@ -30,6 +49,13 @@ def loadLanguage(dictionary:pd.DataFrame, frequencies:pd.DataFrame) -> pd.DataFr
     return output
 
 def addLanguageToDatabase(languageName:str, language:pd.DataFrame, databaseName: str = 'puzzles.db') -> None:
+    """
+    adds language to sqlite database
+    @param languageName: name of the language, becomes name of the table in the database, typically first two characters of language name
+    @param language: dataframe resulting from loadLanguage
+    @param databaseName: name of the sqlite database, typically 'puzzles.db'
+    @return: None
+    """
     conn = sqlite3.connect(databaseName)
     print(language.to_sql(languageName, conn, if_exists='fail'))
     conn.commit()
