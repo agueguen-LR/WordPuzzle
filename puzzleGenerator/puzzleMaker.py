@@ -6,9 +6,12 @@ import pandas as pd
 #Insert the name of the sqlite database here
 SQLITE_DATABASE_NAME = "puzzles.db"
 
+# Authorized languages, prevents SQL injection, add more if needed
+ALLOWED_LANGUAGES = frozenset({'EN', 'FR'})
+
 #Dimensions of the large and the small puzzles
-LDimensions = {'x':13, 'y':6}
-SDimensions = {'x':6, 'y':7}
+LDimensions = (13,6)
+SDimensions = (6,7)
 
 def loadDictionaryFR() -> set:
     """
@@ -57,31 +60,45 @@ def generatePuzzle(size: str) -> pd.DataFrame:
     output = pd.DataFrame({'word': ["VACHE", "POULET"], 'IS_VERTICAL': [True, False], 'x': [3, 5], 'y':[4, 6]})
     return output
 
-def printDatabase(database:str = SQLITE_DATABASE_NAME) -> None:
+def printDatabase(puzzleLanguage:str, database:str = SQLITE_DATABASE_NAME) -> None:
     """
     prints out the puzzle and words database for testing purposes
     @return: None
     """
+    if puzzleLanguage not in ALLOWED_LANGUAGES:
+        raise ValueError(f"Invalid puzzle language: {puzzleLanguage}")
+
     conn = sqlite3.connect(database)
     c = conn.cursor()
     print(c.execute('SELECT * FROM puzzle').fetchall())
-    print(c.execute('SELECT * FROM words').fetchall())
+    tableName = f'puzzleWords{puzzleLanguage}'
+    print(c.execute(f'SELECT * FROM {tableName}').fetchall())
     conn.commit()
     conn.close()
 
-def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleType: str, database:str = SQLITE_DATABASE_NAME) -> None:
+def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tuple, database:str = SQLITE_DATABASE_NAME) -> None:
     """
     Inserts a new puzzle into the database
     @param currentPuzzle: dataframe containing the current puzzle
-    @param puzzleType: character (usually 'S' or 'L') representing the type of puzzle
+    @param puzzleLanguage: 2 characters (example: 'EN' or 'FR') representing the language of puzzle (usually first two letters of the language name)
+    @param puzzleSize: tuple containing the x and y dimensions of the puzzle
     @param database: path to the database, equal to the name specified at the beginning of this python file by default
     @return: None
     """
+    if puzzleLanguage not in ALLOWED_LANGUAGES:
+        raise ValueError(f"Invalid puzzle language: {puzzleLanguage}")
+
     conn = sqlite3.connect(database)
     c = conn.cursor()
-    c.execute("INSERT INTO puzzle(puzzlesize) VALUES (?)", (puzzleType,))
+    c.execute("INSERT INTO puzzle(language, Xdimension, Ydimension) VALUES (?, ?, ?)", (puzzleLanguage, puzzleSize[0], puzzleSize[1]))
+    tableName = f'puzzleWords{puzzleLanguage}'
+    currentPuzzleID = c.execute('SELECT MAX(puzzleID) FROM puzzle').fetchone()[0]
+
     for _, row in currentPuzzle.iterrows():
-        c.execute("INSERT INTO words(puzzleID, word, IS_VERTICAL, x, y) VALUES (?, ?, ?, ?, ?)",
-                  (puzzleType, row['word'], row['IS_VERTICAL'], row['x'], row['y']))
+        wordIndex = c.execute(f"SELECT ID FROM {puzzleLanguage} WHERE word = ?", (row['word'],)).fetchone()[0] #Get index of the word from language database
+
+        c.execute(f"INSERT INTO {tableName}(puzzleID, word, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
+                  (currentPuzzleID, wordIndex, row['IS_VERTICAL'], row['x'], row['y'])) # insert word into puzzle database of appropriate language
+
     conn.commit()
     conn.close()
