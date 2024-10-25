@@ -2,9 +2,9 @@ from collections import Counter
 from random import choices
 import sqlite3
 import pandas as pd
+from pandarallel import pandarallel
 
-#Insert the name of the sqlite database here
-SQLITE_DATABASE_NAME = "puzzles.db"
+pandarallel.initialize(progress_bar=False)
 
 # Authorized languages, prevents SQL injection, add more if needed
 ALLOWED_LANGUAGES = frozenset({'EN', 'FR'})
@@ -13,54 +13,49 @@ ALLOWED_LANGUAGES = frozenset({'EN', 'FR'})
 LDimensions = (13,6)
 SDimensions = (6,7)
 
-def loadDictionaryFR() -> set:
+def generateLetters(amount: int, letterFrequency: dict) -> list:
     """
-    Loads the dictionary for the given language
-    @return: set containing all the words in the given dictionary
+    Generates a list of random letters based on the given frequency
+    @param amount: amount of letters to generate
+    @param letterFrequency: list of floats representing the frequency of each letter in the alphabet
+    @return: list of letters
     """
-    validWords = set()
-    f = open("dictionary-fr.txt", 'r')
-    for line in f:
-        validWords.add(line.strip('\n'))
-    return validWords
+    return choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", weights=list(letterFrequency.values()), k=amount)
 
-def generateLetters(amount: int, letterFrequency: list) -> list:
-     return choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", weights = letterFrequency, k=amount)
-
-def filterWords(allWords: set, letters: list, length=99, minlength = 3) -> set:
+def loadAndFilterWords(database: str, language: str, letters: list, length=99, minlength=3) -> pd.DataFrame:
     """
-    Filters the given set of words to contain only words according to the given constraints
-    @param allWords: set containing all the words of the language
+    Loads and filters words from the SQLite database for the given language and constraints.
+    @param database: path to the SQLite database
+    @param language: 2 characters representing the language of the words (e.g., 'EN' or 'FR')
     @param letters: list of letters that can be contained in the words in the appropriate quantity
     @param length: maximum length of the words
     @param minlength: minimum length of the words
     @return: set containing all the valid words
     """
-    filteredWords = set()
+    if language not in ALLOWED_LANGUAGES:
+        raise ValueError(f"Invalid language: {language}")
+
+    conn = sqlite3.connect(database)
+    c = conn.cursor()
+
+    # Fetch all words from the language table within the given length constraints
+    allWords = pd.DataFrame(
+        c.execute(f"SELECT word, freq FROM {language} WHERE length(word) <= ? and length(word) >= ?",
+                  (length, minlength)).fetchall(), columns=['word', 'freq'])
+    conn.commit()
+    conn.close()
+
     lettersCounter = Counter(letters)
 
-    for word in allWords:
-        #Optimisation: don't do further operations if word is too long
-        if len(word) > length or len(word) < minlength:
-            continue
-        # Optimisation: don't do further operations if word isn't composed of correct letters using set operations
-        if not set(word).issubset(letters):
-            continue
-        # Final check, word is composed of letters in the correct quantities
-        if all(Counter(word)[char] <= lettersCounter[char] for char in Counter(word)):
-            filteredWords.add(word)
+    def is_valid_word(word):
+        word_counter = Counter(word)
+        return all(word_counter[char] <= lettersCounter[char] for char in word_counter)
+
+    filteredWords = allWords[allWords['word'].parallel_apply(is_valid_word)]
+
     return filteredWords
 
-def generatePuzzle(size: str) -> pd.DataFrame:
-    """
-    Generates a puzzle of the given size (usually 'S' or 'L')
-    @param size: character (usually 'S' or 'L') representing the type of puzzle
-    @return: pandas Dataframe containing the words, their direction and their starting coordinates
-    """
-    output = pd.DataFrame({'word': ["VACHE", "POULET"], 'IS_VERTICAL': [True, False], 'x': [3, 5], 'y':[4, 6]})
-    return output
-
-def printDatabase(puzzleLanguage:str, database:str = SQLITE_DATABASE_NAME) -> None:
+def printDatabase(puzzleLanguage:str, database:str) -> None:
     """
     prints out the puzzle and words database for testing purposes
     @return: None
@@ -76,7 +71,7 @@ def printDatabase(puzzleLanguage:str, database:str = SQLITE_DATABASE_NAME) -> No
     conn.commit()
     conn.close()
 
-def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tuple, database:str = SQLITE_DATABASE_NAME) -> None:
+def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tuple, database:str) -> None:
     """
     Inserts a new puzzle into the database
     @param currentPuzzle: dataframe containing the current puzzle
@@ -102,3 +97,14 @@ def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tup
 
     conn.commit()
     conn.close()
+
+def generatePuzzle(size: tuple, availableWords:pd.DataFrame) -> pd.DataFrame:
+    if availableWords.dropna(subset=['freq']).size < 5:
+        raise ValueError("Not enough words to generate a puzzle")
+
+    puzzle = pd.DataFrame(columns=['word', 'is_vertical', 'x', 'y'])
+
+    centerWord = availableWords.dropna(subset=['freq']).sort_values(by='word', key=lambda x: x.str.len(), ascending=False).iloc[0]['word'] #Get the longest word that is common (freq is not NaN)
+    print(centerWord)
+    puzzle = pd.concat([puzzle, pd.DataFrame([{'word': centerWord, 'is_vertical': False, 'x': (size[0]-len(centerWord)) // 2, 'y': size[1] // 2}])], ignore_index=True) # add the center word to the puzzle at the center of the board
+    return puzzle
