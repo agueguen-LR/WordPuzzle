@@ -3,34 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PuzzleHard</title>
-    <link rel="stylesheet" href="/src/css/style.css">
+    <title>Jeu de Puzzle Mots taille 1</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/function.js" defer></script>
 </head>
 <body>
+<div class="game-container">
     <header>
-        <nav>
-            <ul>
-                <li><a href="pages/jeuPuzzle.html">Jeux Puzzle</a></li>
-                <li><a href="pages/aPropos.html">À Propos</a></li>
-            </ul>
-        </nav>
+        <h2>Niveau 1</h2>
     </header>
-    <main>
-        <section id="introduction">
-            <h1>Bienvenue sur PuzzleHard</h1>
-            <p>Découvrez nos jeux de puzzle passionnants et mettez votre esprit à l'épreuve.</p>
-        </section>
-        <section id="jeux">
-            <h2>Nos Jeux</h2>
-            <!-- Contenu des jeux -->
-        </section>
-        <section id="contact">
-            <h2>Contactez-nous</h2>
-            <!-- Formulaire de contact -->
-        </section>
-    </main>
+
+    <div class="grid">
+
+        <div class="tile empty">D</div>
+        <div class="tile empty">U</div>
+        <div class="tile empty">R</div>
+        <div class="tile empty">E</div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">U</div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">P</div>
+        <div class="tile hidden"></div>
+
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">D</div>
+        <div class="tile empty">U</div>
+        <div class="tile empty">R</div>
+        <div class="tile hidden"></div>
+
+        <div class="tile empty">R</div>
+        <div class="tile empty">U</div>
+        <div class="tile empty">E</div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">U</div>
+        <div class="tile hidden"></div>
+
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">D</div>
+        <div class="tile hidden"></div>
+
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile empty">E</div>
+        <div class="tile hidden"></div>
+
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+        <div class="tile hidden"></div>
+
+    </div>
+
+    <div class="text-area"></div>
+
+    <div class="letter-selection">
+        <div class="letter">D</div>
+        <div class="letter">U</div>
+        <div class="letter">R</div>
+        <div class="letter">E</div>
+        <div class="letter">P</div>
+    </div>
+
     <footer>
-        <p>&copy; 2024 PuzzleHard. Tous droits réservés.</p>
+        <button class="power-up definition">⚡ 50</button>
+        <button class="power-up validate">✅ VALIDE</button>
+        <button class="power-up flush">🔄</button>
+        <button class="power-up reset">❌ RESET</button>
+        <button class="power-up hint">💡 100</button>
     </footer>
+</div>
 </body>
 </html>
