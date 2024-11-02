@@ -4,10 +4,7 @@ import sqlite3
 import pandas as pd
 from pandarallel import pandarallel
 
-pandarallel.initialize(progress_bar=False)
-
-# Authorized languages, prevents SQL injection, add more if needed
-ALLOWED_LANGUAGES = frozenset({'EN', 'FR'})
+pandarallel.initialize(progress_bar=False, verbose=0)
 
 #Dimensions of the large and the small puzzles
 LDimensions = (13,6)
@@ -32,16 +29,14 @@ def loadAndFilterWords(database: str, language: str, letters: list, length=99, m
     @param minlength: minimum length of the words
     @return: set containing all the valid words
     """
-    if language not in ALLOWED_LANGUAGES:
-        raise ValueError(f"Invalid language: {language}")
 
     conn = sqlite3.connect(database)
     c = conn.cursor()
 
     # Fetch all words from the language table within the given length constraints
     allWords = pd.DataFrame(
-        c.execute(f"SELECT word, freq FROM {language} WHERE length(word) <= ? and length(word) >= ?",
-                  (length, minlength)).fetchall(), columns=['word', 'freq'])
+        c.execute(f"SELECT word, frequency FROM words WHERE length(word) <= ? and length(word) >= ? and language = ?",
+                  (length, minlength, language)).fetchall(), columns=['word', 'frequency'])
     conn.commit()
     conn.close()
 
@@ -60,14 +55,11 @@ def printDatabase(puzzleLanguage:str, database:str) -> None:
     prints out the puzzle and words database for testing purposes
     @return: None
     """
-    if puzzleLanguage not in ALLOWED_LANGUAGES:
-        raise ValueError(f"Invalid puzzle language: {puzzleLanguage}")
 
     conn = sqlite3.connect(database)
     c = conn.cursor()
-    print(c.execute('SELECT * FROM puzzle').fetchall())
-    tableName = f'puzzleWords{puzzleLanguage}'
-    print(c.execute(f'SELECT * FROM {tableName}').fetchall())
+    print(c.execute('SELECT * FROM puzzles').fetchall())
+    print(c.execute(f'SELECT * FROM puzzleWords').fetchall())
     conn.commit()
     conn.close()
 
@@ -80,31 +72,27 @@ def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tup
     @param database: path to the database, equal to the name specified at the beginning of this python file by default
     @return: None
     """
-    if puzzleLanguage not in ALLOWED_LANGUAGES:
-        raise ValueError(f"Invalid puzzle language: {puzzleLanguage}")
 
     conn = sqlite3.connect(database)
     c = conn.cursor()
-    c.execute("INSERT INTO puzzle(language, Xdimension, Ydimension) VALUES (?, ?, ?)", (puzzleLanguage, puzzleSize[0], puzzleSize[1]))
-    tableName = f'puzzleWords{puzzleLanguage}'
-    currentPuzzleID = c.execute('SELECT MAX(puzzleID) FROM puzzle').fetchone()[0]
+    c.execute("INSERT INTO puzzles(language, Xdimension, Ydimension) VALUES (?, ?, ?)", (puzzleLanguage, puzzleSize[0], puzzleSize[1]))
+    currentPuzzleID = c.execute('SELECT MAX(id) FROM puzzles').fetchone()[0]
 
     for _, row in currentPuzzle.iterrows():
-        wordIndex = c.execute(f"SELECT ID FROM {puzzleLanguage} WHERE word = ?", (row['word'],)).fetchone()[0] #Get index of the word from language database
-
-        c.execute(f"INSERT INTO {tableName}(puzzleID, word, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
+        wordIndex = c.execute(f"SELECT ID FROM words WHERE word = ?", (row['word'],)).fetchone()[0] #Get index of the word from language database
+        c.execute(f"INSERT INTO puzzleWords(puzzleId, wordId, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
                   (currentPuzzleID, wordIndex, row['IS_VERTICAL'], row['x'], row['y'])) # insert word into puzzle database of appropriate language
 
     conn.commit()
     conn.close()
 
 def generatePuzzle(size: tuple, availableWords:pd.DataFrame) -> pd.DataFrame:
-    if availableWords.dropna(subset=['freq']).size < 5:
+    if availableWords.dropna(subset=['frequency']).size < 5:
         raise ValueError("Not enough words to generate a puzzle")
 
     puzzle = pd.DataFrame(columns=['word', 'is_vertical', 'x', 'y'])
 
-    centerWord = availableWords.dropna(subset=['freq']).sort_values(by='word', key=lambda x: x.str.len(), ascending=False).iloc[0]['word'] #Get the longest word that is common (freq is not NaN)
+    centerWord = availableWords.dropna(subset=['frequency']).sort_values(by='word', key=lambda x: x.str.len(), ascending=False).iloc[0]['word'] #Get the longest word that is common (freq is not NaN)
     print(centerWord)
     puzzle = pd.concat([puzzle, pd.DataFrame([{'word': centerWord, 'is_vertical': False, 'x': (size[0]-len(centerWord)) // 2, 'y': size[1] // 2}])], ignore_index=True) # add the center word to the puzzle at the center of the board
     return puzzle
