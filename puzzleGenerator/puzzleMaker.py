@@ -105,16 +105,16 @@ def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: i
         raise ValueError("Not enough words to generate a puzzle")
 
     newPuzzle = pd.DataFrame(columns=['wordID', 'word', 'is_vertical', 'x', 'y'])
-    occupiedArraySpaces = np.array([[0 for _ in range(size[1])] for _ in range(size[0])])
+    occupiedArraySpaces = np.zeros(size, dtype=int)
     print(occupiedArraySpaces.T)
 
     #first word of the puzzle is the longest frequent word and is placed in the center of the board
     centerWord = frequentWords.iloc[0]
     frequentWords.drop(frequentWords.index[0], inplace=True) # Remove the center word from the list of frequent words
 
-    newPuzzle = __add_word_to_puzzle(newPuzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord)) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
+    newPuzzle = __add_word_to_puzzle(newPuzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord['word'])) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
     print(newPuzzle)
-    occupiedArraySpaces = __update_occupied_spaces(occupiedArraySpaces, centerWord['word'], (size[0]-len(centerWord)) // 2, (size[1]-1) // 2, False) # update the occupied spaces of the puzzle
+    occupiedArraySpaces = __update_occupied_spaces(occupiedArraySpaces, centerWord['word'], (size[0]-len(centerWord['word'])) // 2, (size[1]-1) // 2, False) # update the occupied spaces of the puzzle
     print(occupiedArraySpaces.T)
 
     return newPuzzle
@@ -169,20 +169,62 @@ def __word_can_be_placed(word: str, intersectionTuple: tuple, occupiedSpaces: np
         return False
 
     letterIndexes = [m.start() for m in finditer(intersectionTuple[3], word)] #Get all indexes of the intersection letter in the word
+    adjacentFlag = False
 
     for index in letterIndexes: #for all theoretical placements of the word
         if intersectionTuple[2]: #Tests for vertical placement
-            if intersectionTuple[1] - index < 0 or intersectionTuple[1] + (len(word)-1)-index >= puzzleDimensions[1]: #If the word goes out of bounds
+            startOfWord = intersectionTuple[1] - index
+            endOfWord = intersectionTuple[1] + (len(word)-1)-index
+
+            if startOfWord < 0 or endOfWord >= puzzleDimensions[1]: #If the word goes out of bounds
                 continue
 
+            for i in range(startOfWord, endOfWord+1):
+                if i == intersectionTuple[1]: #Skip the intersection letter
+                    continue
+                #This uses Python's short-circuit evaluation: if the first condition is true, the second condition is not evaluated, avoiding an index out of bounds error
+                #This also uses 1 as True for the second condition as it is a numpy array containing 1s and 0s
+                if intersectionTuple[0]+1 < puzzleDimensions[0] and occupiedSpaces[intersectionTuple[0]+1, i]: # Check if there are any adjacent words to the right
+                    adjacentFlag = True
+                    break
+                if intersectionTuple[0]-1 >= 0 and occupiedSpaces[intersectionTuple[0]-1, i]: # Check if there are any adjacent words to the left
+                    adjacentFlag = True
+                    break
+            if adjacentFlag: #If an adjacent word was found, skip to the next index in letterIndexes
+                continue
+            if startOfWord-1 >= 0 and occupiedSpaces[intersectionTuple[0], startOfWord-1]: # Check if there are any adjacent words above
+                continue
+            if endOfWord+1 < puzzleDimensions[1] and occupiedSpaces[intersectionTuple[0], endOfWord+1]: # Check if there are any adjacent words below
+                continue
 
+        else:  # Tests for horizontal placement
+            startOfWord = intersectionTuple[0] - index
+            endOfWord = intersectionTuple[0] + (len(word) - 1) - index
 
-        else: #Tests for horizontal placement
-            if intersectionTuple[0] - index < 0 or intersectionTuple[0] + (len(word)-1)-index >= puzzleDimensions[0]: #If the word goes out of bounds
+            if startOfWord < 0 or endOfWord >= puzzleDimensions[0]:  # If the word goes out of bounds
+                continue
+
+            for i in range(startOfWord, endOfWord + 1):
+                if i == intersectionTuple[0]:  # Skip the intersection letter
+                    continue
+
+                if intersectionTuple[1] + 1 < puzzleDimensions[1] and occupiedSpaces[i, intersectionTuple[1] + 1]:  # Check if there are any adjacent words below
+                    adjacentFlag = True
+                    break
+
+                if intersectionTuple[1] - 1 >= 0 and occupiedSpaces[i, intersectionTuple[1] - 1]:  # Check if there are any adjacent words above
+                    adjacentFlag = True
+                    break
+
+            if adjacentFlag:  # If an adjacent word was found, skip to the next index in letterIndexes
+                continue
+
+            if startOfWord - 1 >= 0 and occupiedSpaces[startOfWord - 1, intersectionTuple[1]]:  # Check if there are any adjacent words to the left
+                continue
+
+            if endOfWord + 1 < puzzleDimensions[0] and occupiedSpaces[endOfWord + 1, intersectionTuple[1]]:  # Check if there are any adjacent words to the right
                 continue
 
         return True
 
-
-
-    return True
+    return False #No valid placement found
