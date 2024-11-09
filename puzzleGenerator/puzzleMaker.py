@@ -1,5 +1,5 @@
 from collections import Counter
-from random import choices
+from random import choices, choice
 import sqlite3
 import numpy as np
 import pandas as pd
@@ -87,6 +87,8 @@ def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tup
     conn.commit()
     conn.close()
 
+#Extreme rare case, could generate the exact same puzzle twice
+#so unlikely that it shouldn't be a problem with the randomness of generateLetters and of attemptTuple
 def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: int = 5) -> pd.DataFrame:
     """
     Generates a puzzle with the given size and available words
@@ -112,23 +114,40 @@ def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: i
     centerWord = frequentWords.iloc[0]
     frequentWords.drop(frequentWords.index[0], inplace=True) # Remove the center word from the list of frequent words
 
-    newPuzzle = __add_word_to_puzzle(newPuzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord['word'])) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
+    newPuzzle = __add_word_to_puzzle(newPuzzle, centerWord['wordID'], centerWord['word'],
+                                     (size[0] - len(centerWord['word'])) // 2, (size[1] - 1) // 2,
+                                     False)  # add the center word to the puzzle at the center of the board
     print(newPuzzle)
     occupiedArraySpaces = __update_occupied_spaces(occupiedArraySpaces, centerWord['word'], (size[0]-len(centerWord['word'])) // 2, (size[1]-1) // 2, False) # update the occupied spaces of the puzzle
     print(occupiedArraySpaces.T)
 
+    potentialNewWordTuples = []
+
+    # main generation loop
+    while len(potentialNewWordTuples) > 0:
+        attemptTuple = choice(potentialNewWordTuples) # Choose a random tuple from the list of potential new words positions
+        for(_, word) in frequentWords.iterrows():
+            wordIndex = __word_can_be_placed(word['word'], attemptTuple, occupiedArraySpaces, size) # Check if the word can be placed
+
+            if wordIndex != -1: # The word can be placed
+                coordsOfNewWord = (attemptTuple[0], wordIndex) if attemptTuple[2] else (wordIndex, attemptTuple[1]) # Calculate the coordinates of the new word
+                newPuzzle = __add_word_to_puzzle(newPuzzle, word['wordID'], word['word'], coordsOfNewWord[0], coordsOfNewWord[1], attemptTuple[2])  # Add the new word to the puzzle
+                occupiedArraySpaces = __update_occupied_spaces(occupiedArraySpaces, word['word'], coordsOfNewWord[0], coordsOfNewWord[1], attemptTuple[2]) # Update the occupied spaces of the puzzle
+
+            potentialNewWordTuples = __update_potential_words_list(potentialNewWordTuples, attemptTuple, wordIndex, word['word']) # Update the list of potential new words
+
     return newPuzzle
 
-def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, is_vertical: bool, x: int, y: int) -> pd.DataFrame:
+def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, x: int, y: int, is_vertical: bool) -> pd.DataFrame:
     """
     Reminder: the double underscore indicates this function is private and should not be called from outside the module
     Adds a word to the puzzle
     @param puzzle: dataframe containing the current puzzle
     @param wordID: id of the word in the words database
     @param word: word to add
-    @param is_vertical: boolean indicating if the word is vertical
     @param x: x coordinate of the word
     @param y: y coordinate of the word
+    @param is_vertical: boolean indicating if the word is vertical
     @return: updated puzzle
     """
     return pd.concat([puzzle, pd.DataFrame([{'wordID': wordID, 'word': word, 'is_vertical': is_vertical, 'x': x, 'y': y}])], ignore_index=True)
@@ -154,19 +173,20 @@ def __update_occupied_spaces(occupiedSpaces: np.ndarray, word: str, x: int, y: i
 
     return occupiedSpaces
 
-def __word_can_be_placed(word: str, intersectionTuple: tuple, occupiedSpaces: np.ndarray, puzzleDimensions: tuple) -> bool:
+#Doesn't allow Intersections for now
+def __word_can_be_placed(word: str, intersectionTuple: tuple, occupiedSpaces: np.ndarray, puzzleDimensions: tuple) -> int:
     """
     Reminder: the double underscore indicates this function is private and should not be called from outside the module
     Checks if a word can be placed in given position on the puzzle
     !! No side words allowed in this version !!
     @param word: word to place
-    @param intersectionTuple: Main tuple of the generation algorithm, should contain: (x, y, go_vertical_bool, letter)
+    @param intersectionTuple: Main tuple of the generation algorithm, should contain: (x, y, go_vertical_bool)
     @param occupiedSpaces: numpy array containing the occupied spaces of the puzzle as 1, unoccupied as 0
     @param puzzleDimensions: tuple containing the x and y dimensions of the puzzle
-    @return: boolean indicating if the word can be placed
+    @return: index of the first letter of the word if it can be placed, -1 otherwise (x or y depending on the direction the word is trying to be placed)
     """
-    if intersectionTuple[3] not in word: #If the intersection letter is not in the word we wish to place, return False
-        return False
+    if intersectionTuple[3] not in word: #If the intersection letter is not in the word we wish to place, return -1
+        return -1
 
     letterIndexes = [m.start() for m in finditer(intersectionTuple[3], word)] #Get all indexes of the intersection letter in the word
     adjacentFlag = False
@@ -207,24 +227,50 @@ def __word_can_be_placed(word: str, intersectionTuple: tuple, occupiedSpaces: np
             for i in range(startOfWord, endOfWord + 1):
                 if i == intersectionTuple[0]:  # Skip the intersection letter
                     continue
-
                 if intersectionTuple[1] + 1 < puzzleDimensions[1] and occupiedSpaces[i, intersectionTuple[1] + 1]:  # Check if there are any adjacent words below
                     adjacentFlag = True
                     break
-
                 if intersectionTuple[1] - 1 >= 0 and occupiedSpaces[i, intersectionTuple[1] - 1]:  # Check if there are any adjacent words above
                     adjacentFlag = True
                     break
-
             if adjacentFlag:  # If an adjacent word was found, skip to the next index in letterIndexes
                 continue
-
             if startOfWord - 1 >= 0 and occupiedSpaces[startOfWord - 1, intersectionTuple[1]]:  # Check if there are any adjacent words to the left
                 continue
-
             if endOfWord + 1 < puzzleDimensions[0] and occupiedSpaces[endOfWord + 1, intersectionTuple[1]]:  # Check if there are any adjacent words to the right
                 continue
 
-        return True
+        return startOfWord #Valid placement found
+    return -1 #No valid placement found
 
-    return False #No valid placement found
+#Doesn't allow Intersections for now (partially because of the __word_can_be_placed function not handling them)
+def __update_potential_words_list(potentialWordTuples: list, newWordStartIndex: int, newWord: str, removedTuple: tuple) -> list:
+    """
+    Updates the available letters list, deleting the first tuple from the list and adding more if needed
+    For first word: use tuple (-1, y_coord, False) as removedTuple because newWordStartIndex will be x_coord
+    if you want a vertical first word, use tuple (x_coord, -1, True) at your own risk (not tested)
+    @param potentialWordTuples: main list of tuples used during puzzle generation
+    @return: updated potentialWordTuples
+    """
+    if len(potentialWordTuples) > 0: #If the list isn't empty (only case this isn't true is when adding the first word)
+        potentialWordTuples.remove(removedTuple)
+    
+    if newWordStartIndex == -1: #no new word needs to be added
+        return potentialWordTuples
+
+    #Add new potential tuples to the list
+    newWordEndIndex = newWordStartIndex+len(newWord)-1
+    if removedTuple[2]: #If the new word is vertical
+        for i in range(newWordStartIndex, newWordEndIndex+1):
+            #skip the intersection letter
+            if i == removedTuple[1]:
+                continue
+            potentialWordTuples.append((removedTuple[0], i, False))
+    else: #If the new word is horizontal
+        for i in range(newWordStartIndex, newWordEndIndex+1):
+            #skip the intersection letter
+            if i == removedTuple[0]:
+                continue
+            potentialWordTuples.append((i, removedTuple[1], True))
+
+    return potentialWordTuples
