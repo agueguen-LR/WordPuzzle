@@ -1,8 +1,10 @@
 from collections import Counter
 from random import choices
 import sqlite3
+import numpy as np
 import pandas as pd
 from pandarallel import pandarallel
+from re import finditer
 
 pandarallel.initialize(progress_bar=False, verbose=0)
 
@@ -102,17 +104,20 @@ def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: i
     if frequentWords.shape[0] < minimumWordCount:
         raise ValueError("Not enough words to generate a puzzle")
 
-    puzzle = pd.DataFrame(columns=['wordID', 'word', 'is_vertical', 'x', 'y'])
+    newPuzzle = pd.DataFrame(columns=['wordID', 'word', 'is_vertical', 'x', 'y'])
+    occupiedArraySpaces = np.array([[0 for _ in range(size[1])] for _ in range(size[0])])
+    print(occupiedArraySpaces.T)
 
     #first word of the puzzle is the longest frequent word and is placed in the center of the board
     centerWord = frequentWords.iloc[0]
-    print(centerWord)
     frequentWords.drop(frequentWords.index[0], inplace=True) # Remove the center word from the list of frequent words
 
-    print(frequentWords)
-    puzzle = __add_word_to_puzzle(puzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord)) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
+    newPuzzle = __add_word_to_puzzle(newPuzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord)) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
+    print(newPuzzle)
+    occupiedArraySpaces = __update_occupied_spaces(occupiedArraySpaces, centerWord['word'], (size[0]-len(centerWord)) // 2, (size[1]-1) // 2, False) # update the occupied spaces of the puzzle
+    print(occupiedArraySpaces.T)
 
-    return puzzle
+    return newPuzzle
 
 def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, is_vertical: bool, x: int, y: int) -> pd.DataFrame:
     """
@@ -127,3 +132,57 @@ def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, is_vertic
     @return: updated puzzle
     """
     return pd.concat([puzzle, pd.DataFrame([{'wordID': wordID, 'word': word, 'is_vertical': is_vertical, 'x': x, 'y': y}])], ignore_index=True)
+
+def __update_occupied_spaces(occupiedSpaces: np.ndarray, word: str, x: int, y: int, is_vertical: bool) -> np.ndarray:
+    """
+    Reminder: the double underscore indicates this function is private and should not be called from outside the module
+    Updates the occupied spaces of the puzzle
+    @param occupiedSpaces: numpy array containing the occupied spaces of the puzzle
+    @param word: word to add
+    @param x: x coordinate of the word
+    @param y: y coordinate of the word
+    @param is_vertical: boolean indicating if the word is vertical
+    @return: updated occupied spaces
+    """
+    if is_vertical:
+        for i in range(len(word)):
+            occupiedSpaces[x, y+i] = 1
+    else:
+        print(occupiedSpaces.shape)
+        for i in range(len(word)):
+            occupiedSpaces[x+i, y] = 1
+
+    return occupiedSpaces
+
+def __word_can_be_placed(word: str, intersectionTuple: tuple, occupiedSpaces: np.ndarray, puzzleDimensions: tuple) -> bool:
+    """
+    Reminder: the double underscore indicates this function is private and should not be called from outside the module
+    Checks if a word can be placed in given position on the puzzle
+    !! No side words allowed in this version !!
+    @param word: word to place
+    @param intersectionTuple: Main tuple of the generation algorithm, should contain: (x, y, go_vertical_bool, letter)
+    @param occupiedSpaces: numpy array containing the occupied spaces of the puzzle as 1, unoccupied as 0
+    @param puzzleDimensions: tuple containing the x and y dimensions of the puzzle
+    @return: boolean indicating if the word can be placed
+    """
+    if intersectionTuple[3] not in word: #If the intersection letter is not in the word we wish to place, return False
+        return False
+
+    letterIndexes = [m.start() for m in finditer(intersectionTuple[3], word)] #Get all indexes of the intersection letter in the word
+
+    for index in letterIndexes: #for all theoretical placements of the word
+        if intersectionTuple[2]: #Tests for vertical placement
+            if intersectionTuple[1] - index < 0 or intersectionTuple[1] + (len(word)-1)-index >= puzzleDimensions[1]: #If the word goes out of bounds
+                continue
+
+
+
+        else: #Tests for horizontal placement
+            if intersectionTuple[0] - index < 0 or intersectionTuple[0] + (len(word)-1)-index >= puzzleDimensions[0]: #If the word goes out of bounds
+                continue
+
+        return True
+
+
+
+    return True
