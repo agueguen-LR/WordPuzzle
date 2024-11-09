@@ -35,8 +35,8 @@ def loadAndFilterWords(database: str, language: str, letters: list, length=99, m
 
     # Fetch all words from the language table within the given length constraints
     allWords = pd.DataFrame(
-        c.execute(f"SELECT word, frequency FROM words WHERE length(word) <= ? and length(word) >= ? and language = ?",
-                  (length, minlength, language)).fetchall(), columns=['word', 'frequency'])
+        c.execute("SELECT id, word, frequency FROM words WHERE length(word) <= ? and length(word) >= ? and language = ?",
+                  (length, minlength, language)).fetchall(), columns=['wordID', 'word', 'frequency'])
     conn.commit()
     conn.close()
 
@@ -55,44 +55,75 @@ def printDatabase(puzzleLanguage:str, database:str) -> None:
     prints out the puzzle and words database for testing purposes
     @return: None
     """
-
     conn = sqlite3.connect(database)
     c = conn.cursor()
     print(c.execute('SELECT * FROM puzzles').fetchall())
-    print(c.execute(f'SELECT * FROM puzzleWords').fetchall())
+    print(c.execute('SELECT * FROM puzzleWords').fetchall())
     conn.commit()
     conn.close()
 
-def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tuple, database:str) -> None:
+def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tuple, database:str, letters:str) -> None:
     """
     Inserts a new puzzle into the database
     @param currentPuzzle: dataframe containing the current puzzle
     @param puzzleLanguage: 2 characters (example: 'EN' or 'FR') representing the language of puzzle (usually first two letters of the language name)
     @param puzzleSize: tuple containing the x and y dimensions of the puzzle
     @param database: path to the database, equal to the name specified at the beginning of this python file by default
+    @param letters: string containing the letters used to generate the puzzle
     @return: None
     """
-
     conn = sqlite3.connect(database)
     c = conn.cursor()
-    c.execute("INSERT INTO puzzles(language, Xdimension, Ydimension) VALUES (?, ?, ?)", (puzzleLanguage, puzzleSize[0], puzzleSize[1]))
+    c.execute("INSERT INTO puzzles(language, Xdimension, Ydimension, letters) VALUES (?, ?, ?, ?)", (puzzleLanguage, puzzleSize[0], puzzleSize[1], letters))
     currentPuzzleID = c.execute('SELECT MAX(id) FROM puzzles').fetchone()[0]
 
     for _, row in currentPuzzle.iterrows():
-        wordIndex = c.execute(f"SELECT ID FROM words WHERE word = ?", (row['word'],)).fetchone()[0] #Get index of the word from language database
-        c.execute(f"INSERT INTO puzzleWords(puzzleId, wordId, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
+        wordIndex = c.execute("SELECT ID FROM words WHERE word = ? and language = ?", (row['word'], puzzleLanguage)).fetchone()[0] #Get index of the word from language database
+        c.execute("INSERT INTO puzzleWords(puzzleId, wordId, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
                   (currentPuzzleID, wordIndex, row['IS_VERTICAL'], row['x'], row['y'])) # insert word into puzzle database of appropriate language
 
     conn.commit()
     conn.close()
 
-def generatePuzzle(size: tuple, availableWords:pd.DataFrame) -> pd.DataFrame:
-    if availableWords.dropna(subset=['frequency']).size < 5:
+def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: int = 5) -> pd.DataFrame:
+    """
+    Generates a puzzle with the given size and available words
+    @param size: tuple of the x and y dimensions of the puzzle
+    @param availableWords: Dataframe containing the available words and their frequency (from loadAndFilterWords)
+    @param minimumWordCount: minimum amount of words with frequency>0 to generate a puzzle
+    @return: Dataframe containing the generated puzzle
+    """
+    frequentWords = ((availableWords.dropna(subset=['frequency']) #Remove words with NaN frequency
+                                    .sort_values(by='frequency', ascending=False)) #Sort by descending frequency
+                                    .sort_values(by='word', key=lambda x: x.str.len(), ascending=False, kind='mergesort')) #Sort by descending word length while keeping the frequency order
+
+    print(frequentWords)
+
+    if frequentWords.shape[0] < minimumWordCount:
         raise ValueError("Not enough words to generate a puzzle")
 
-    puzzle = pd.DataFrame(columns=['word', 'is_vertical', 'x', 'y'])
+    puzzle = pd.DataFrame(columns=['wordID', 'word', 'is_vertical', 'x', 'y'])
 
-    centerWord = availableWords.dropna(subset=['frequency']).sort_values(by='word', key=lambda x: x.str.len(), ascending=False).iloc[0]['word'] #Get the longest word that is common (freq is not NaN)
+    #first word of the puzzle is the longest frequent word and is placed in the center of the board
+    centerWord = frequentWords.iloc[0]
     print(centerWord)
-    puzzle = pd.concat([puzzle, pd.DataFrame([{'word': centerWord, 'is_vertical': False, 'x': (size[0]-len(centerWord)) // 2, 'y': size[1] // 2}])], ignore_index=True) # add the center word to the puzzle at the center of the board
+    frequentWords.drop(frequentWords.index[0], inplace=True) # Remove the center word from the list of frequent words
+
+    print(frequentWords)
+    puzzle = __add_word_to_puzzle(puzzle, centerWord['wordID'], centerWord['word'], False, (size[0]-len(centerWord)) // 2, (size[1]-1) // 2) # add the center word to the puzzle at the center of the board
+
     return puzzle
+
+def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, is_vertical: bool, x: int, y: int) -> pd.DataFrame:
+    """
+    Reminder: the double underscore indicates this function is private and should not be called from outside the module
+    Adds a word to the puzzle
+    @param puzzle: dataframe containing the current puzzle
+    @param wordID: id of the word in the words database
+    @param word: word to add
+    @param is_vertical: boolean indicating if the word is vertical
+    @param x: x coordinate of the word
+    @param y: y coordinate of the word
+    @return: updated puzzle
+    """
+    return pd.concat([puzzle, pd.DataFrame([{'wordID': wordID, 'word': word, 'is_vertical': is_vertical, 'x': x, 'y': y}])], ignore_index=True)
