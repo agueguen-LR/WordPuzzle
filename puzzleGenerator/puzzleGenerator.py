@@ -86,9 +86,8 @@ def insertPuzzle(currentPuzzle: pd.DataFrame, puzzleLanguage:str, puzzleSize:tup
     currentPuzzleID = c.execute('SELECT MAX(id) FROM puzzles').fetchone()[0]
 
     for _, row in currentPuzzle.iterrows():
-        wordIndex = c.execute("SELECT ID FROM words WHERE word = ? and language = ?", (row['word'], puzzleLanguage)).fetchone()[0] #Get index of the word from language database
         c.execute("INSERT INTO puzzleWords(puzzleId, wordId, is_vertical, Xcoord, Ycoord) VALUES (?, ?, ?, ?, ?)",
-                  (currentPuzzleID, wordIndex, row['IS_VERTICAL'], row['x'], row['y'])) # insert word into puzzle database of appropriate language
+                  (currentPuzzleID, row['wordID'], row['is_vertical'], row['x'], row['y'])) # insert word into puzzle database of appropriate language
 
     conn.commit()
     conn.close()
@@ -145,6 +144,30 @@ def generatePuzzle(size: tuple, availableWords:pd.DataFrame, minimumWordCount: i
         potentialNewWordTuples.remove(attemptTuple) # Remove the tuple from the list of potential new words as it has been used
 
     return newPuzzle
+
+def generateNewPuzzlesIntoDatabase(amountOfPuzzlesToGenerate: int, database: str, dimensions: tuple, language: str, amountOfLetters: int, frequencyTable: dict) -> None:
+    """
+    Generates a given amount of puzzles and inserts them into the database
+    @param amountOfPuzzlesToGenerate: amount of puzzles to generate
+    @param database: path to the SQLite database
+    @param dimensions: dimensions of the puzzles to generate (x, y)
+    @param language: language of the puzzles to generate (e.g., 'EN' or 'FR')
+    @param amountOfLetters: amount of letters the puzzles will contain (e.g., 6)
+    @param frequencyTable: frequency table of the letters in the language the puzzles will be generated in, refer to the tables in the puzzleGenerator.py file
+    @return: None
+    """
+    puzzlesGenerated = 0
+    allWords = load_words(database, language, amountOfLetters, 3)
+    while puzzlesGenerated != amountOfPuzzlesToGenerate:
+        try:
+            letters = generateLetters(amountOfLetters, frequencyTable)
+            filteredWords = filter_words(allWords, letters)
+            newPuzzle = generatePuzzle(dimensions, filteredWords)
+            insertPuzzle(newPuzzle, language, dimensions, database, ''.join(letters))
+            puzzlesGenerated += 1
+        except ValueError:
+            continue
+    return
 
 def __add_word_to_puzzle(puzzle: pd.DataFrame, wordID: int, word: str, x: int, y: int, is_vertical: bool) -> pd.DataFrame:
     """
