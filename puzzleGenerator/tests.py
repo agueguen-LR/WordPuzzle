@@ -1,10 +1,13 @@
-from puzzleMaker import *
-from WordsDatabaseGenerator import *
-import time
+from puzzleGenerator import *
+from time import time
 from tqdm import tqdm
 
 #Insert the name of the sqlite database here
 SQLITE_DATABASE_NAME = "Database/puzzles.db"
+
+#Dimensions of the large and the small puzzles
+LDimensions = (13,6)
+SDimensions = (6,7)
 
 frequenciesEN = {
         'A': 8.167, 'B': 1.492, 'C': 2.782, 'D': 4.253, 'E': 12.702, 'F': 2.228, 'G': 2.015, 'H': 6.094,
@@ -20,45 +23,18 @@ frequenciesFR = {
         'Y': 0.128, 'Z': 0.326
     }
 
-frenchDictionaryFileAddress = "dictionary-fr.txt"
-frenchLexiconLink = "http://www.lexique.org/databases/Lexique382/Lexique382.tsv" #'ortho', 'freqfilms2', 'freqlivres'
-englishLexiconLink = "http://www.lexique.org/databases/SUBTLEX-US/SUBTLEXus74286wordstextversion.tsv" #'Word', 'SUBTLWF'
-
-# dictionary = loadDictionary(frenchDictionaryFileAddress)
-# frequencies = loadFrequency(frenchLexiconLink, ['ortho', 'freqfilms2', 'freqlivres'])
-# words = loadLanguage(dictionary, frequencies)
-# addLanguageToDatabase("french", words, SQLITE_DATABASE_NAME, "FR")
-# insertPuzzle(generatePuzzle(LDimensions), 'FR', LDimensions)
-# frenchDictionaryAll = loadDictionaryFR()
-# frenchDictionaryABCDE = filterWords(frenchDictionaryAll, "ABCSE")
-# print(frenchDictionaryABCDE)
-# printDatabase()
 letters = generateLetters(6, frequenciesFR)
 print("Randomly chosen letters: ")
 print(letters)
-startTime = time.time()
-allFrenchWords = load_words(SQLITE_DATABASE_NAME, "FR", 99, 3)
-print("Time taken to load words: ", time.time() - startTime, "seconds")
-startTime = time.time()
+startTime = time()
+allFrenchWords = load_words(SQLITE_DATABASE_NAME, "FR", 6, 3)
+print("Time taken to load words: ", time() - startTime, "seconds")
+startTime = time()
 filteredWords = filter_words(allFrenchWords, letters)
-print("Time taken to filter words: ", time.time() - startTime, "seconds")
+print("Time taken to filter words: ", time() - startTime, "seconds")
 # print(filteredWords)
 # print(filteredWords.shape)
-startTime = time.time()
+startTime = time()
 newPuzzle = generatePuzzle(LDimensions, filteredWords)
 print(newPuzzle)
-print("Time taken to generate puzzle: ", time.time() - startTime, "seconds")
-
-puzzlesGenerated = 0
-
-startTime = time.time()
-for _ in tqdm(range(1000)):
-    try:
-        letters = generateLetters(6, frequenciesFR)
-        filteredWords = filter_words(allFrenchWords, letters)
-        newPuzzle = generatePuzzle(LDimensions, filteredWords)
-        puzzlesGenerated += 1
-    except ValueError:
-        continue
-print("Puzzles successfully generated: ", puzzlesGenerated, "/1000")
-print("Time taken to generate 1000 puzzles: ", time.time() - startTime, "seconds")
+print("Time taken to generate puzzle: ", time() - startTime, "seconds")
