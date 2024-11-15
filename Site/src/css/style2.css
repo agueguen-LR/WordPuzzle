@@ -13,7 +13,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #fff;
+    color: #9a00ff;
 }
 
 /* Style the game container */
@@ -34,7 +34,7 @@ header {
 
 header h2 {
     font-size: 18px;
-    color: #fff;
+    color: #9a00ff;
 }
 
 /* Style the grid layout */
@@ -55,7 +55,7 @@ header h2 {
     align-items: center;
     font-size: 24px;
     font-weight: bold;
-    color: #fff;
+    color: #9a00ff;
     height: 50px;
     width: 50px;
 }
@@ -108,7 +108,7 @@ button {
     padding: 10px;
     font-size: 18px;
     cursor: pointer;
-    color: #fff;
+    color: #9a00ff;
 }
 
 button:hover {
@@ -126,7 +126,7 @@ button:hover {
     justify-content: center;
     font-size: 16px;
     background-color: #1a1a1a;
-    color: #fff;
+    color: #9a00ff;
 }
 
 /* Burger Menu Styles */
@@ -139,7 +139,7 @@ button:hover {
     font-size: 30px;
     cursor: pointer;
     display: block;
-    color: #fff;
+    color: #9a00ff;
 }
 
 #menu-toggle {
@@ -169,7 +169,7 @@ button:hover {
 .menu ul li a {
     display: block;
     padding: 10px 20px;
-    color: #fff;
+    color: #9a00ff;
     text-decoration: none;
 }
 

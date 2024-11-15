@@ -16,7 +16,7 @@
             <label for="menu-toggle" class="menu-icon">&#9776;</label>
             <nav class="menu">
                 <ul>
-                    <li><a href="aPropos.html">Accueil</a></li>
+                    <li><a href="index.html">Accueil</a></li>
                     <li><a href="tablette.html">Tablette</a></li>
                 </ul>
             </nav>
@@ -24,56 +24,15 @@
     </header>
 
     <div class="grid">
-
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile empty"></div>
-        <div class="tile hidden"></div>
-
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-        <div class="tile hidden"></div>
-
+        <script>
+            const rows = 6;
+            const cols = 6;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    document.write(`<div class="tile empty" id="${row},${col}"></div>`);
+                }
+            }
+        </script>
     </div>
 
     <div class="text-area"></div>
