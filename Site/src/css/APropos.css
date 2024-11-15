@@ -22,6 +22,12 @@ body {
 header {
     background-color: #1a1a1a;
     padding: 10px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+header:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 header nav ul {
@@ -40,10 +46,11 @@ header nav ul li a {
     color: #fff;
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.3s, transform 0.3s;
 }
 
 header nav ul li a:hover {
-    text-decoration: underline;
+    text-decoration: underline overline #ffffff;
 }
 
 /* Style the main content */
@@ -75,6 +82,11 @@ h1, h2 {
     border-radius: 5px;
 }
 
+#team ul li:hover {
+    transform: scale(1.5);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
 #team p {
     background-color: #1a1a1a;
     padding: 15px;
@@ -82,8 +94,20 @@ h1, h2 {
     border-radius: 5px;
 }
 
+#team p:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
 /* Style the footer */
 footer {
     background-color: #1a1a1a;
     padding: 10px 0;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+footer:hover {
+    transform: scale(1.1);
+    box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.5);
 }

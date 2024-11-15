@@ -13,6 +13,10 @@ header {
     background-color: #1a1a1a;
     padding: 10px 0;
 }
+header:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
 nav ul {
     list-style: none;
     padding: 0;
@@ -29,7 +33,7 @@ nav a {
     font-weight: bold;
 }
 nav a:hover {
-    text-decoration: underline;
+    text-decoration: underline overline #ffffff;
 }
 main {
     flex-grow: 1;
@@ -54,6 +58,8 @@ main {
 }
 .play-button:hover {
     background-color: #6a0dad;
+    transform: scale(1.5);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 footer {
     background-color: #1a1a1a;

@@ -17,7 +17,7 @@ body {
 .game-container {
     background: rgba(0, 0, 0, 0.8);
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     width: 400px;
     padding: 20px;
 }
@@ -54,6 +54,12 @@ header h2 {
     width: 50px;
 }
 
+.tile:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
 .tile.filled {
     background-color: #9400ff;
     color: #fff;
@@ -73,6 +79,11 @@ header h2 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+}
+.letter:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 .letter {
@@ -104,7 +115,9 @@ button {
 }
 
 button:hover {
-    background-color: #9400ff;
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 .text-area {
@@ -124,6 +137,10 @@ button:hover {
 .burger-menu {
     position: relative;
     display: inline-block;
+}
+.burger-menu:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 .menu-icon {
@@ -165,7 +182,7 @@ button:hover {
 }
 
 .menu ul li a:hover {
-    background-color: #9400ff;
+    background-color: #404040;
 }
 
 #menu-toggle:checked + .menu-icon + .menu {
