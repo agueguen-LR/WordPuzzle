@@ -1,11 +1,3 @@
-/* Reset default margin, padding, and box-sizing for all elements */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Set the font and background color for the body */
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #000000 0%, #4b0082 100%);
@@ -17,77 +9,40 @@ body {
     height: 100vh;
     margin: 0;
 }
-
-/* Style the header */
 header {
     background-color: #1a1a1a;
     padding: 10px 0;
 }
-
-header nav ul {
+nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     justify-content: center;
 }
-
-header nav ul li {
+nav li {
     margin: 0 15px;
 }
-
-header nav ul li a {
+nav a {
     color: #fff;
     text-decoration: none;
     font-weight: bold;
 }
-
-header nav ul li a:hover {
+nav a:hover {
     text-decoration: underline;
 }
-
-/* Style the main content */
 main {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
 }
-
-/* Style the game title */
 .game-title {
     font-size: 3em;
     margin-bottom: 20px;
-    color: #fff;
 }
-
-/* Style the game container */
-.game-container {
-    margin: 20px 0;
-}
-
-/* Style the device selection area */
-.device-selection {
-    background-color: #1a1a1a;
-    padding: 15px;
-    border: 1px solid #4b0082;
-    border-radius: 5px;
-    margin: 10px 0;
-}
-
-.device-radio {
-    margin-right: 10px;
-}
-
-/* Style the start button container */
-.start-button-container {
-    margin-top: 20px;
-}
-
-/* Style the start button */
-.start-button {
+.play-button {
     background-color: #4b0082;
     color: #fff;
     border: none;
@@ -97,18 +52,10 @@ main {
     border-radius: 10px;
     transition: background-color 0.3s;
 }
-
-.start-button:hover {
+.play-button:hover {
     background-color: #6a0dad;
 }
-
-/* Style the footer */
-.footer {
+footer {
     background-color: #1a1a1a;
-    color: #fff;
-    text-align: center;
     padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
 }
