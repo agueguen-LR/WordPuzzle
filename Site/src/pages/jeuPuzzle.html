@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu Puzzle</title>
+    <link rel="stylesheet" href="../css/jeuPuzzle.css">
+</head>
+<body>
+<header class="header">
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="aPropos.html" class="nav-link">Accueil</a></li>
+            <li class="nav-item"><a href="jeuPuzzle.html" class="nav-link">Jeux Puzzle</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main-content">
+    <section id="jeu" class="game-section">
+        <h1 class="game-title">Jeu Puzzle</h1>
+        <div id="game-container" class="game-container">
+        </div>
+        <div class="device-selection">
+            <p>Choisissez votre type d'appareil :</p>
+            <label for="telephone">Telephone</label>
+            <input type="radio" id="telephone" name="device" class="device-radio">
+            <label for="tablette">Tablette</label>
+            <input type="radio" id="tablette" name="device" class="device-radio">
+        </div>
+        <div class="start-button-container">
+            <button id="start-game" class="start-button">Commencer le jeu</button>
+        </div>
+    </section>
+</main>
+<footer class="footer">
+    <p>&copy; 2024 PuzzleHard. Tous droits réservés.</p>
+</footer>
+
+<script>
+    document.getElementById('start-game').addEventListener('click', function() {
+        const radios = document.querySelectorAll('.device-radio');
+        let isChecked = false;
+        let device = '';
+
+        radios.forEach(function(radio) {
+            if (radio.checked) {
+                isChecked = true;
+                device = radio.id;
+            }
+        });
+
+        if (isChecked) {
+            switch (device) {
+                case 'telephone':
+                    window.location.href = 'telephone.html';
+                    break;
+                case 'tablette':
+                    window.location.href = 'tablette.html';
+                    break;
+                default:
+                    alert('Veuillez cocher une option.');
+            }
+        } else {
+            alert('Veuillez cocher une option.');
+        }
+    });
+</script>
+</body>
+</html>

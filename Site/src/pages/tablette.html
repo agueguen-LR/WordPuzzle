@@ -3,42 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Puzzle Mots taille 3</title>
-    <link rel="stylesheet" href="src/css/style3.css">
-    <script src="src/js/function.js" defer></script>
-
+    <title>Jeu de Puzzle Mots taille 2</title>
+    <link rel="stylesheet" href="../css/style2.css">
+    <script src="../js/function.js" defer></script>
 </head>
 <body>
 <div class="game-container">
     <header>
         <h2>Niveau 1</h2>
+        <div class="burger-menu">
+            <input type="checkbox" id="menu-toggle">
+            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <nav class="menu">
+                <ul>
+                    <li><a href="aPropos.html">Accueil</a></li>
+                    <li><a href="telephone.html">Téléphone</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <div class="grid">
-        <div class="tile filled">a</div>
-        <div class="tile filled">b</div>
-        <div class="tile filled">c</div>
-        <div class="tile filled">d</div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-
-        <div class="tile empty"></div>
-        <div class="tile filled">c</div>
-        <div class="tile filled">d</div>
-        <div class="tile filled">a</div>
-        <div class="tile empty"></div>
-        <div class="tile empty"></div>
-
-        <div class="tile filled">b</div>
-        <div class="tile filled">d</div>
-        <div class="tile filled">a</div>
         <div class="tile empty"></div>
         <div class="tile empty"></div>
         <div class="tile empty"></div>
-
-        <div class="tile filled">c</div>
-        <div class="tile filled">a</div>
-        <div class="tile filled">b</div>
         <div class="tile empty"></div>
         <div class="tile empty"></div>
         <div class="tile empty"></div>
@@ -111,13 +99,13 @@
     <div class="text-area"></div>
 
     <div class="letter-selection">
-        <div class="letter">a</div>
-        <div class="letter">b</div>
-        <div class="letter">c</div>
-        <div class="letter">d</div>
-        <div class="letter">e</div>
-        <div class="letter">f</div>
-        <div class="letter">g</div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
     </div>
 
     <footer>
@@ -130,4 +118,3 @@
 </div>
 </body>
 </html>
-
