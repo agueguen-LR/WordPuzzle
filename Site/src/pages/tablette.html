@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Puzzle Mots taille 2</title>
+    <link rel="stylesheet" href="../css/style2.css">
+    <script src="../js/function.js" defer></script>
+</head>
+<body>
+<div class="game-container">
+    <header>
+        <h2>Niveau 1</h2>
+        <div class="burger-menu">
+            <input type="checkbox" id="menu-toggle">
+            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <nav class="menu">
+                <ul>
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="telephone.html">Téléphone</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="grid">
+        <script>
+            const rows = 10
+            const cols = 6;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    document.write(`<div class="tile empty" id="${row},${col}"></div>`);
+                }
+            }
+        </script>
+    </div>
+
+    <div class="text-area"></div>
+
+    <div class="letter-selection">
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+    </div>
+
+    <footer>
+        <button class="power-up definition">⚡ 50</button>
+        <button class="power-up validate">✅ VALIDE</button>
+        <button class="power-up flush">🔄</button>
+        <button class="power-up reset">❌ RESET</button>
+        <button class="power-up hint">💡 100</button>
+    </footer>
+</div>
+</body>
+</html>
