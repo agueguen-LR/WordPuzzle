@@ -21,7 +21,7 @@ body {
     background: rgba(0, 0, 0, 0.8);
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    width: 700px;
+    width: 810px;
     padding: 20px;
 }
 
@@ -40,7 +40,7 @@ header h2 {
 /* Style the grid layout */
 .grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
+    grid-template-columns: repeat(13, 1fr);
     gap: 10px;
     margin: 20px 0;
 }
@@ -68,7 +68,7 @@ header h2 {
 
 .tile.filled {
     background-color: #9400ff;
-    color: #fff;
+    color: #0000007F;
 }
 
 .tile.empty {

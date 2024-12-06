@@ -1,8 +1,8 @@
 <?php
 include('connexion.php');
-$essai_joueur  = htmlspecialchars($_GET['essai_joueur']);
+$essai_joueur  = htmlspecialchars($_GET['word']);
 //Recuperation du puzzle
-$idPuzzle = htmlspecialchars($_GET['idPuzzle']);
+$idPuzzle = htmlspecialchars($_GET['id']);
 
 //
 $verificationPrepared = $connexion->prepare('SELECT PW.Xcoord, PW.Ycoord, PW.is_vertical from Puzzles P

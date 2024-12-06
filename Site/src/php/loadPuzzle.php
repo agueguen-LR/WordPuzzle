@@ -1,4 +1,5 @@
 <?php
+global $connexion;
 include('connexion.php');
 //Variables Parametres
 
