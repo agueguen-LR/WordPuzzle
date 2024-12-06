@@ -34,10 +34,32 @@ On the remote server :
 - When modification is made : ```$ sudo systemctl reload nginx.service```
 
 ## Usage
-User will be able to connect to website from the internet and play a basic, randomly generated puzzle game
+
+### Adding Puzzles to the Database
+
+Install requirements
+```bash
+pip install -r ./puzzleGenerator/requirements.txt
+```
+
+You can add 100 small english puzzles, large english puzzles, small french puzzles, and large french puzzles to the database by running the add400Puzzles.py script.:
+
+```bash
+python3 ./puzzleGenerator/add400Puzzles.py
+```
+
+Otherwise you can use the add400Puzzles.py script as an example to add your own puzzles to the database.
+
+### Adding a new language to the database
+
+Adding a new language requires:
+ - a dictionary.txt file containing all the valid words of the language, capitalized, one per line
+ - a link to an openlexicon database containing the language's word frequencies
+
+You can then use the addLanguageToDatabase.py as an example.
 
 ## Roadmap
-Finalize communication between PHP and JS
+Fully functional, additional functionalities added on a case-by-case basis
 
 ## Authors and acknowledgment
 Maxime Bucher-Martin
@@ -49,4 +71,5 @@ Enzo Cateau
 Ekaekatai Gonzalez-Leroy 
 
 ## Project status
-Half way through development, currently working on the communication between backend and frontend.
+
+Final steps of development, finishing touches
