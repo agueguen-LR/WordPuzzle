@@ -1,0 +1,5 @@
+numpy
+pandas
+pandarallel
+sqlite3
+unidecode
