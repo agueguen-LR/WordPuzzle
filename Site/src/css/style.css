@@ -62,12 +62,12 @@ header h2 {
 
 .tile.filled {
     background-color: #9400ff;
-    color: #fff;
+    color: #0000007F;
 }
 
 .tile.empty {
     background-color: transparent;
-    color: #fff;
+    color: #0000007F;
     border: 2px dashed #9400ff;
 }
 
