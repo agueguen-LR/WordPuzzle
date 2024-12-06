@@ -1,5 +1,5 @@
-// Liste des mots valides
-const listeMots = [];
+// Site/src/js/function.js
+
 // Contenu actuel de la zone de texte et lettres sélectionnées
 let selectedLetters = [];
 let textAreaContent = '';
@@ -78,12 +78,50 @@ function setupPowerUpButtons() {
 /**
  * Valide le mot formé dans la zone de texte.
  */
-function validateWord() {
+async function validateWord() {
     const word = document.querySelector('.text-area').textContent;
-    if (listeMots.includes(word)) {
-        alert('Mot valide !');
+    const id = document.querySelector('h2.id').textContent;
+    if (word.length > 0) {
+        const result = await getDataWord(word, id);
+        if (result) {
+            const coordonnees = {
+                coord: `${parseInt(result.Xcoord)},${parseInt(result.Ycoord)}`,
+                isVertical: result.is_vertical
+            };
+
+            const cell = document.getElementById(coordonnees.coord);
+            const isVertical = coordonnees.isVertical;
+
+            if (cell) {
+                cell.classList.remove('empty');
+                cell.classList.add('filled');
+                cell.textContent = word[0];
+            }
+            if (!isVertical) {
+                for (let i = 1; i < word.length; i++) {
+                    const nextCell = document.getElementById(`${parseInt(coordonnees.coord.split(',')[0]) + i},${parseInt(coordonnees.coord.split(',')[1])}`);
+                    if (nextCell) {
+                        nextCell.classList.remove('empty');
+                        nextCell.classList.add('filled');
+                        nextCell.textContent = word[i];
+                    }
+                }
+            } else {
+                for (let i = 1; i < word.length; i++) {
+                    const nextCell = document.getElementById(`${parseInt(coordonnees.coord.split(',')[0])},${parseInt(coordonnees.coord.split(',')[1]) + i}`);
+                    if (nextCell) {
+                        nextCell.classList.remove('empty');
+                        nextCell.classList.add('filled');
+                        nextCell.textContent = word[i];
+                    }
+                }
+            }
+            console.log(result);
+        } else {
+            console.log('Gros NUL ;p');
+        }
     } else {
-        alert('Ce mot n\'existe pas !');
+        alert('La zone de texte est vide.');
     }
     resetTextAreaAndLetters();
 }
@@ -95,7 +133,7 @@ function resetTextAreaAndLetters() {
     document.querySelector('.text-area').textContent = '';
     selectedLetters.forEach(letter => {
         letter.classList.remove('selected');
-        letter.style.backgroundColor = 'white';
+        letter.style.backgroundColor = '#1a1a1a';
     });
     selectedLetters = [];
     textAreaContent = '';
@@ -124,4 +162,25 @@ function setupMenuToggle() {
     menuToggle.addEventListener('change', () => {
         menu.style.display = menuToggle.checked ? 'block' : 'none';
     });
+}
+
+/**
+ * Fonction pour obtenir les données du mot.
+ * @param {string} word - Le mot à valider.
+ * @param {string} id - L'ID du mot.
+ * @returns {Promise} - Les données du mot.
+ */
+async function getDataWord(word, id) {
+    const url = "";
+    try {
+        const response = await fetch("http://localhost:63342/serveur_ubihard/Site/src/php/verification.php?word=" + word + "&id=" + id);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const json = await response.json();
+        return json; // Ensure the data is returned
+    } catch (error) {
+        console.error(error.message);
+    }
 }
