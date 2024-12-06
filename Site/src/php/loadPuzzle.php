@@ -1,4 +1,5 @@
 <?php
+global $connexion;
 include('connexion.php');
 //Variables Parametres
 
@@ -15,6 +16,9 @@ switch ($type) {
         break;
     case 1:
         $dimensions = [6,7];
+        break;
+    default:
+        throw new Exception('Type de puzzle inconnu');
 }
 switch ($lang) {
     case 0:
@@ -22,10 +26,13 @@ switch ($lang) {
         break;
     case 1:
         $langue = 'EN';
+        break;
+    default:
+        throw new Exception('Langue de puzzle inconnu');
 }
 
 //Requête préparé
-$puzzleCaracteristics =$connexion->prepare('
+$puzzleCaracteristics = $connexion->prepare('
 SELECT PS.id, PS.letters
 FROM puzzles PS
     JOIN  puzzleWords P ON PS.id = P.puzzleId

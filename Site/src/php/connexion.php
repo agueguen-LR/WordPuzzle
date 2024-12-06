@@ -2,7 +2,7 @@
 //phpinfo();
 
 try {
-    $connexion = new PDO('sqlite:..\..\..\Database\puzzles.db');
+    $connexion = new PDO('sqlite:../../../Database/puzzles.db');
 }
 catch(Exception $e)
 {
