@@ -58,6 +58,29 @@ Adding a new language requires:
 
 You can then use the addLanguageToDatabase.py as an example.
 
+## PHP files
+
+#### loadPuzzle.php 
+This file takes the following parameters:
+
+- type : 
+  - 1 : size 13.6
+  - 2 : size 6.7
+- lang :
+  - EN : English
+  - FR : French
+
+The file will return a JSON containing: 
+- the ID of the puzzle
+- the letters
+- the XY location of each word and if it's vertical or not
+- the length of each word
+  
+#### verification.php 
+This file takes the word played by the player as a string and the ID of the current puzzle.  
+It will return, if the word exists, the XY of the word and if it's vertical. If it doesn't exist, it will return false.
+
+
 ## Roadmap
 Fully functional, additional functionalities added on a case-by-case basis
 
