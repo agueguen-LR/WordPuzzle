@@ -1,7 +1,7 @@
 from WordsDatabaseGenerator import *
 
 #Insert the name of the sqlite database here
-SQLITE_DATABASE_NAME = "Database/puzzles.db"
+SQLITE_DATABASE_NAME = "../Database/puzzles.db"
 
 frenchDictionaryFileAddress = "dictionary-fr.txt" #file containing all valid words of the Scrabble dictionary, one per line
 englishDictionaryFileAddress = "dictionary-en.txt"
