@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Puzzle Mots taille 1</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/function.js" defer></script>
+</head>
+<body>
+<div class="game-container">
+    <header>
+        <h2 class="id"></h2>
+        <div class="burger-menu">
+            <input type="checkbox" id="menu-toggle">
+            <label for="menu-toggle" class="menu-icon">&#9776;</label>
+            <nav class="menu">
+                <ul>
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="tablette.html">Tablette</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="grid">
+        <script>
+            const rows = 7;
+            const cols = 6;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    document.write(`<div class="tile hidden" id="${col},${row}"></div>`);
+                }
+            }
+        </script>
+    </div>
+
+    <div class="text-area"></div>
+
+    <div class="letter-selection">
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+        <div class="letter"></div>
+    </div>
+
+    <footer>
+        <button class="power-up definition">⚡ 50</button>
+        <button class="power-up validate">✅ VALIDE</button>
+        <button class="power-up flush">🔄</button>
+        <button class="power-up reset">❌ RESET</button>
+        <button class="power-up hint">💡 100</button>
+    </footer>
+</div>
+
+<script>
+    async function getData() {
+        const url = "";
+        try {
+            const response = await fetch("http://localhost:63342/serveur_ubihard/Site/src/php/loadPuzzle.php?type=1&lang=0");
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const json = await response.json();
+            return json; // Ensure the data is returned
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    let dataList = [];
+    async function fetchData() {
+        const data = await getData();
+        if (data && data.length > 0) {
+            dataList = data;
+            let letterData = dataList[0].letters;
+            const coordonnees = [];
+            for (let i = 1; i < dataList.length ; i++) {
+                coordonnees.push({
+                    coord: parseInt(dataList[i].Xcoord) + "," + parseInt(dataList[i].Ycoord),
+                    isVertical: dataList[i].is_vertical,
+                    length: dataList[i].length
+                });
+            }
+            if (!Array.isArray(letterData)) {
+                letterData = Array.from(letterData);
+            }
+
+            // Update the letter selection elements
+            const letterElements = document.querySelectorAll('.letter-selection .letter');
+            letterData.forEach((letter, index) => {
+                if (letterElements[index]) {
+                    letterElements[index].textContent = letter;
+                }
+            });
+
+            // Update the h2 element with class id
+            const idElement = document.querySelector('h2.id');
+            if (idElement) {
+                idElement.textContent = dataList[0].id;
+            }
+
+            // Add the filled class to grid cells with corresponding IDs
+            coordonnees.forEach(coord => {
+                const cell = document.getElementById(coord.coord);
+                const isVertical = coord.isVertical;
+                const length = parseInt(coord.length);
+                if (cell) {
+                    cell.classList.remove('hidden');
+                    cell.classList.add('empty');
+                }
+                if (!isVertical) {
+                    for (let i = 1; i < length; i++) {
+                        const nextCell = document.getElementById(`${parseInt(coord.coord.split(',')[0]) + i},${parseInt(coord.coord.split(',')[1])}`);
+                        if (nextCell) {
+                            nextCell.classList.remove('hidden');
+                            nextCell.classList.add('empty');
+                        }
+                    }
+                } else {
+                    for (let i = 1; i < length; i++) {
+                        const nextCell = document.getElementById(`${parseInt(coord.coord.split(',')[0])},${parseInt(coord.coord.split(',')[1]) + i}`);
+                        if (nextCell) {
+                            nextCell.classList.remove('hidden');
+                            nextCell.classList.add('empty');
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error("Data is undefined or empty");
+        }
+    }
+
+    fetchData();
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+/* Reset default margin, padding, and box-sizing for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Set the font, background, and layout for the body */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #000000 0%, #9400ff 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #9a00ff;
+}
+
+/* Style the game container */
+.game-container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    width: 810px;
+    padding: 20px;
+}
+
+/* Style the header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h2 {
+    font-size: 18px;
+    color: #9400ff;
+}
+
+/* Style the grid layout */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+/* Style the tiles */
+.tile {
+    background-color: #1a1a1a;
+    border: 2px solid #9400ff;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #9400ff;
+    height: 50px;
+    width: 50px;
+}
+
+.tile:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.tile.filled {
+    background-color: #9400ff;
+    color: #0000007F;
+}
+
+.tile.empty {
+    background-color: transparent;
+    border: 2px dashed #9400ff;
+}
+
+.tile.hidden {
+    visibility: hidden;
+}
+
+/* Style the letter selection area */
+.letter-selection {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.letter {
+    background-color: #1a1a1a;
+    border: 2px solid #9400ff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+}
+
+.letter:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Style the footer */
+footer {
+    display: flex;
+    justify-content: space-around;
+}
+
+/* Style the buttons */
+button {
+    background-color: #1a1a1a;
+    border: 2px solid #9400ff;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #9400ff;
+}
+
+button:hover {
+    background-color: #1a1a1a;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Style the text area */
+.text-area {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #9400ff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background-color: #1a1a1a;
+    color: #9400ff;
+}
+
+/* Burger Menu Styles */
+.burger-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.burger-menu:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.menu-icon {
+    font-size: 30px;
+    cursor: pointer;
+    display: block;
+    color: #9400ff;
+}
+
+#menu-toggle {
+    display: none;
+}
+
+.menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu ul li {
+    border-bottom: 1px solid #9400ff;
+}
+
+.menu ul li a {
+    display: block;
+    padding: 10px 20px;
+    color: #9400ff;
+    text-decoration: none;
+}
+
+.menu ul li a:hover {
+    background-color: #404040;
+}
+
+#menu-toggle:checked + .menu-icon + .menu {
+    display: block;
+}
